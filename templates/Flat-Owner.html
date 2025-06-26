@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureGate+ Flat Owner Dashboard</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- DataTables -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css"/>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.2.2/css/buttons.bootstrap5.min.css"/>
+    <!-- DateRangePicker -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+    
+    <style>
+        :root {
+            --primary-color: #0A2647;
+            --secondary-color: #144272;
+            --accent-color: #205295;
+            --highlight-color: #2C74B3;
+            --success-color: #2ecc71;
+            --warning-color: #f1c40f;
+            --danger-color: #e74c3c;
+            --light-bg: #f8f9fa;
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--light-bg);
+            overflow-x: hidden;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: 280px;
+            background: linear-gradient(to bottom, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding-top: 20px;
+            transition: var(--transition);
+            z-index: 1000;
+            box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+        }
+
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.85);
+            padding: 12px 20px;
+            margin: 4px 16px;
+            border-radius: 10px;
+            transition: var(--transition);
+            font-size: 0.95rem;
+        }
+
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            background: var(--accent-color);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .sidebar .nav-link i {
+            width: 24px;
+            text-align: center;
+            margin-right: 8px;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            padding: 20px;
+            transition: var(--transition);
+        }
+
+        /* Navbar Styles */
+        .owner-navbar {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 15px 20px;
+            margin-bottom: 30px;
+            border-radius: 15px;
+        }
+
+        .owner-profile img {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            border: 2px solid var(--accent-color);
+            transition: var(--transition);
+        }
+
+        .owner-profile img:hover {
+            transform: scale(1.05);
+        }
+
+        .profile-dropdown {
+            position: absolute;
+            right: 20px;
+            top: 50px; /* Adjusted to appear just below navbar */
+            background: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            min-width: 300px;
+            display: none;
+            z-index: 1000;
+        }
+
+        .profile-dropdown.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        /* Card Styles */
+        .dashboard-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            padding: 25px;
+            margin-bottom: 25px;
+            transition: var(--transition);
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        /* Stats Cards */
+        .stats-card {
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+            color: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stats-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1));
+            pointer-events: none;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        /* Family Member Card */
+        .family-member-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: var(--transition);
+        }
+
+        .family-member-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .member-photo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        /* Table Styles */
+        .custom-table {
+            width: 100%;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .custom-table th {
+            background: var(--primary-color);
+            color: white;
+            padding: 15px;
+            font-weight: 500;
+        }
+
+        .custom-table td {
+            padding: 12px 15px;
+            vertical-align: middle;
+        }
+
+        .custom-table tbody tr {
+            transition: var(--transition);
+        }
+
+        .custom-table tbody tr:hover {
+            background: var(--light-bg);
+            transform: scale(1.01);
+        }
+
+        /* Status Badges */
+        .badge {
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: 500;
+            color: white !important; /* Ensure text is always white */
+        }
+
+        .badge-pending {
+            background-color: var(--warning-color);
+            color: white !important;
+        }
+
+        .badge-approved {
+            background-color: var(--success-color);
+            color: white !important;
+        }
+
+        .badge-denied {
+            background-color: var(--danger-color);
+            color: white !important;
+        }
+
+        .badge-pre-approved {
+            background-color: var(--success-color);
+            color: white !important;
+        }
+
+        /* Form Styles */
+        .form-control:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 0.2rem rgba(44, 116, 179, 0.25);
+        }
+
+        /* Animations */
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 250px;
+            }
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0;
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="text-center mb-4">
+            <i class="fas fa-building fa-2x mb-2"></i>
+            <h4>SecureGate+</h4>
+            <small>Flat Owner Dashboard</small>
+        </div>
+        <nav class="nav flex-column">
+            <a class="nav-link active" href="#dashboard">
+                <i class="fas fa-home"></i> Dashboard
+            </a>
+            <a class="nav-link" href="#family">
+                <i class="fas fa-users"></i> Family Members
+            </a>
+            <a class="nav-link" href="#visitors">
+                <i class="fas fa-history"></i> Visitor Records
+            </a>
+            <a class="nav-link" href="#pre-approve">
+                <i class="fas fa-clipboard-check"></i> Pre-approve Visitors
+            </a>
+            <!-- <a class="nav-link" href="#settings">
+                <i class="fas fa-cog"></i> Settings
+            </a> -->
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        
+<!-- Navbar -->
+<div class="owner-navbar d-flex justify-content-between align-items-center">
+    <button class="btn d-lg-none" id="sidebarToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+    <div class="d-flex align-items-center">
+        <h4 class="mb-0">Flat Owner Dashboard</h4>
+    </div>
+    <div class="owner-profile">
+         <img src="/static/owner_logo1.png" alt="Owner" id="profileToggle">
+        <!-- <span id="profileToggle" class="d-flex align-items-center">
+            <b><span id="ownerName">Loading...</span></b>
+        </span> -->
+        <div class="profile-dropdown">
+            <div class="text-center mb-3">
+                <h5 id="profileName">Loading...</h5>
+                <span class="badge bg-primary">Flat Owner</span>
+            </div>
+            <div class="border-top pt-3 mt-3">
+                <p class="mb-2"><i class="fas fa-id-badge me-2"></i><span id="profileId">ID: N/A</span></p>
+                <p class="mb-2"><i class="fas fa-home me-2"></i><span id="profileFlat">Flat: N/A</span></p>
+                <p class="mb-2"><i class="fas fa-envelope me-2"></i><span id="profileEmail">Email: N/A</span></p>
+                <p class="mb-2"><i class="fas fa-phone me-2"></i><span id="profileWhatsapp">WhatsApp: N/A</span></p>
+            </div>
+            <div class="d-grid gap-2 mt-3">
+                <button class="btn btn-outline-danger btn-sm" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt me-2"></i>Logout
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+        <!-- Stats Row -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <i class="fas fa-users"></i>
+                    <h3 id="familyCount">0</h3>
+                    <p class="mb-0">Family Members</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <i class="fas fa-user-friends"></i>
+                    <h3 id="todayVisitors">0</h3>
+                    <p class="mb-0">Today's Visitors</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <i class="fas fa-clipboard-check"></i>
+                    <h3 id="preApprovedCount">0</h3>
+                    <p class="mb-0">Pre-approved</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <i class="fas fa-clock"></i>
+                    <h3 id="pendingCount">0</h3>
+                    <p class="mb-0">Pending Approvals</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Family Members Section (Empty by Default) -->
+        <div class="dashboard-card" id="family">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5><i class="fas fa-users me-2"></i>Family Members</h5>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addFamilyMemberModal">
+                    <i class="fas fa-plus me-2"></i>Add Member
+                </button>
+            </div>
+            <div class="row" id="familyMembersList">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+
+        <!-- Visitor Records (Empty Table Body) -->
+        <div class="dashboard-card" id="visitors">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5><i class="fas fa-history me-2"></i>Visitor Records</h5>
+                <div class="d-flex gap-2">
+                    <input type="text" class="form-control" id="dateRange" placeholder="Select Date Range">
+                    <div class="btn-group">
+                        <button class="btn btn-outline-primary active">Today</button>
+                        <button class="btn btn-outline-primary">Week</button>
+                        <button class="btn btn-outline-primary">Month</button>
+                    </div>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table custom-table" id="visitorRecordsTable">
+                    <thead>
+                        <tr>
+                            <th>Visitor Name</th>
+                            <th>Contact</th>
+                            <th>Purpose</th>
+                            <th>Entry Time</th>
+                            <th>Exit Time</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pre-approve Visitors (Empty Table Body) -->
+        <div class="dashboard-card" id="pre-approve">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5><i class="fas fa-clipboard-check me-2"></i>Pre-approve Visitors</h5>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#preApproveModal">
+                    <i class="fas fa-plus me-2"></i>New Pre-approval
+                </button>
+            </div>
+            <div class="table-responsive">
+                <table class="table custom-table" id="preApprovalTable">
+                    <thead>
+                        <tr>
+                            <th>Visitor Name</th>
+                            <th>Contact</th>
+                            <th>Purpose</th>
+                            <th>Expected Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Family Member Modal -->
+    <div class="modal fade" id="addFamilyMemberModal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Family Member</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="familyMemberForm" class="row g-3">
+                        <!-- Full Name -->
+                        <div class="col-md-6">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" class="form-control" name="name" required>
+                        </div>
+
+                        <!-- Relationship -->
+                        <div class="col-md-6">
+                            <label class="form-label">Relationship</label>
+                            <select class="form-select" name="relationship" required>
+                                <option value="">Select Relationship</option>
+                                <option value="Spouse">Spouse</option>
+                                <option value="Child">Child</option>
+                                <option value="Parent">Parent</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        <!-- Contact Number -->
+                        <div class="col-md-6">
+                            <label class="form-label">Contact Number</label>
+                            <input type="tel" class="form-control" name="contact" required>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="col-md-6">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" name="email">
+                        </div>
+
+                        <!-- ID Type -->
+                        <div class="col-md-6">
+                            <label class="form-label">ID Type</label>
+                            <select class="form-select" name="id_type" required>
+                                <option value="">Select ID Type</option>
+                                <option value="Passport">Passport</option>
+                                <option value="Driver's License">Driver's License</option>
+                                <option value="National ID">National ID</option>
+                            </select>
+                        </div>
+
+                        <!-- ID Number -->
+                        <div class="col-md-6">
+                            <label class="form-label">ID Number</label>
+                            <input type="text" class="form-control" name="id_number" required>
+                        </div>
+
+                        <!-- Photo Upload -->
+                        <div class="col-12">
+                            <label class="form-label">Photo</label>
+                            <input type="file" class="form-control" name="photo" accept="image/*" required>
+                        </div>
+
+                        <!-- ID Proof Upload -->
+                        <div class="col-12">
+                            <label class="form-label">ID Proof</label>
+                            <input type="file" class="form-control" name="id_proof" accept="image/*" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="addFamilyMember()">Add Member</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pre-approve Visitor Modal -->
+    <div class="modal fade" id="preApproveModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Pre-approve Visitor</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="preApproveForm" class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Visitor Name</label>
+                            <input type="text" class="form-control" name="visitor_name" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Contact Number</label>
+                            <input type="tel" class="form-control" name="contact_number" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Purpose of Visit</label>
+                            <input type="text" class="form-control" name="purpose" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Expected Date</label>
+                            <input type="date" class="form-control" name="expected_date" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Expected Time</label>
+                            <input type="time" class="form-control" name="expected_time" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Additional Notes</label>
+                            <textarea class="form-control" name="additional_notes" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="preApproveVisitor()">Pre-approve</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+    
+    <script>
+        $(document).ready(function () {
+            // Function to show error/success messages
+            function showMessage(message, type = 'danger') {
+                const alertDiv = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                                    ${message}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                  </div>`;
+                $('.main-content').prepend(alertDiv);
+                setTimeout(() => $('.alert').alert('close'), 5000);
+            }
+        
+            // Initialize DataTables with proper pagination
+            let visitorTable = $('#visitorRecordsTable').DataTable({
+                pageLength: 10,
+                lengthMenu: [10, 25, 50, 100],
+                paging: true,
+                searching: true,
+                ordering: true,
+                info: true,
+                responsive: true
+            });
+            let preApprovalTable = $('#preApprovalTable').DataTable({
+                pageLength: 10,
+                lengthMenu: [10, 25, 50, 100],
+                paging: true,
+                searching: true,
+                ordering: true,
+                info: true,
+                responsive: true
+            });
+        
+            // Load Dashboard Stats
+            function loadDashboardStats() {
+                fetch('/flat_owner/flat_owner_dashboard_stats', { method: 'GET', credentials: 'include' })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            $('#familyCount').text(data.family_members);
+                            $('#todayVisitors').text(data.todays_visitors);
+                            $('#preApprovedCount').text(data.preapproved_visitors);
+                            $('#pendingCount').text(data.pending_visitors);
+                        } else {
+                            showMessage(data.message);
+                        }
+                    })
+                    .catch(error => showMessage('Unable to load dashboard data.'));
+            }
+        
+            // Load Owner Profile
+            function loadOwnerProfile() {
+                fetch('/flat_owner/get_owner_profile', { 
+                    method: 'GET', 
+                    credentials: 'include' 
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(data => {
+                            throw new Error(data.message || `HTTP ${response.status}`);
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success && data.profile) {
+                        const profile = data.profile;
+                        $('#ownerName').text(profile.name || 'N/A');
+                        $('#profileName').text(profile.name || 'N/A');
+                        $('#profileId').text(`ID: ${profile.id || 'N/A'}`);
+                        $('#profileFlat').text(`Flat: ${profile.flat_number || 'N/A'}`);
+                        $('#profileEmail').text(`Email: ${profile.email || 'N/A'}`);
+                        $('#profileWhatsapp').text(`WhatsApp: ${profile.whatsapp || 'N/A'}`);
+                    } else {
+                        showMessage(data.message || 'Failed to load profile.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Profile fetch error:', error);
+                    showMessage(`Unable to load profile: ${error.message}`);
+                });
+            }
+            
+            // Add Family Member
+            window.addFamilyMember = function () {
+                let formData = new FormData($('#familyMemberForm')[0]);
+                fetch('/flat_owner/add_family_member', {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showMessage(data.message, 'success');
+                        $('#addFamilyMemberModal').modal('hide');
+                        $('#familyMemberForm')[0].reset();
+                        loadFamilyMembers();
+                    } else {
+                        showMessage(data.message);
+                    }
+                })
+                .catch(error => showMessage('Failed to add family member.'));
+            };
+        
+            // Load Family Members
+            function loadFamilyMembers() {
+                fetch('/flat_owner/get_family_members', { credentials: 'include' })
+                    .then(response => response.json())
+                    .then(data => {
+                        let familyContainer = $('#familyMembersList');
+                        familyContainer.empty();
+                        if (data.success) {
+                            data.members.forEach(member => {
+                                familyContainer.append(`
+                                    <div class="col-md-4">
+                                        <div class="family-member-card">
+                                            <h5>${member.name}</h5>
+                                            <p>Relationship: ${member.relationship}</p>
+                                            <p>Contact: ${member.contact}</p>
+                                        </div>
+                                    </div>
+                                `);
+                            });
+                        } else {
+                            showMessage(data.message);
+                        }
+                    })
+                    .catch(error => showMessage('Error loading family members.'));
+            }
+        
+            // Load Visitor Records
+            function loadVisitorRecords(filter = 'all', startDate = null, endDate = null, searchQuery = '') {
+                const url = new URL('/flat_owner/visitor_records', window.location.origin);
+                url.searchParams.append('filter', filter);
+                if (startDate && endDate) {
+                    url.searchParams.append('start_date', startDate);
+                    url.searchParams.append('end_date', endDate);
+                }
+                if (searchQuery) {
+                    url.searchParams.append('search', searchQuery);
+                }
+
+                fetch(url, { credentials: 'include' })
+                    .then(response => response.json())
+                    .then(data => {
+                        visitorTable.clear();
+                        if (Array.isArray(data)) {
+                            data.forEach(record => {
+                                const statusClass = record.status.toLowerCase().replace(/\s+/g, '-');
+                                visitorTable.row.add([
+                                    record.visitor_name,
+                                    record.contact_number || 'N/A',
+                                    record.purpose,
+                                    record.entry_time || 'Not Recorded',
+                                    record.exit_time || 'Not Recorded',
+                                    `<span class="badge badge-${statusClass}">${record.status}</span>`
+                                ]);
+                            });
+                            visitorTable.draw();
+                        } else {
+                            showMessage('Error loading visitor records.');
+                        }
+                    })
+                    .catch(error => showMessage('Failed to load visitor records.'));
+            }
+        
+            // Load Pre-approved Visitors
+            function loadPreApprovedVisitors() {
+                fetch('/flat_owner/get_pre_approved_visitors', { credentials: 'include' })
+                    .then(response => response.json())
+                    .then(data => {
+                        preApprovalTable.clear();
+                        if (data.success && Array.isArray(data.pre_approved_visitors)) {
+                            data.pre_approved_visitors.forEach(record => {
+                                const statusClass = record.status.toLowerCase().replace(/\s+/g, '-');
+                                preApprovalTable.row.add([
+                                    record.visitor_name,
+                                    record.contact_number || 'N/A',
+                                    record.purpose,
+                                    record.expected_date || 'Not Provided',
+                                    `<span class="badge badge-${statusClass}">${record.status}</span>`,
+                                    '<button class="btn btn-sm btn-danger">Cancel</button>'
+                                ]);
+                            });
+                            preApprovalTable.draw();
+                        } else {
+                            showMessage(data.message || 'Error loading pre-approved visitors.');
+                        }
+                    })
+                    .catch(error => showMessage('Failed to load pre-approved visitors.'));
+            }
+        
+            // Pre-approve Visitor
+            window.preApproveVisitor = function () {
+                let formData = new FormData($('#preApproveForm')[0]);
+                let visitorData = {
+                    visitor_name: formData.get('visitor_name'),
+                    contact_number: formData.get('contact_number'),
+                    purpose: formData.get('purpose'),
+                    expected_date: `${formData.get('expected_date')} ${formData.get('expected_time')}`,
+                    additional_notes: formData.get('additional_notes')
+                };
+        
+                fetch('/flat_owner/pre_approve', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(visitorData),
+                    credentials: 'include'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showMessage(data.message, 'success');
+                        $('#preApproveModal').modal('hide');
+                        $('#preApproveForm')[0].reset();
+                        loadPreApprovedVisitors();
+                    } else {
+                        showMessage(data.message);
+                    }
+                })
+                .catch(error => showMessage('Failed to pre-approve visitor.'));
+            };
+        
+            // Logout Functionality
+            $('#logoutBtn').on('click', function() {
+                fetch('/logout', { credentials: 'include' })
+                    .then(response => response.redirected ? { success: true } : response.json())
+                    .then(data => {
+                        if (data.success) {
+                            window.location.href = '/';
+                        } else {
+                            showMessage('Logout failed: ' + (data.message || 'Unknown error'));
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error during logout:', error);
+                        showMessage('Logout failed: Unable to connect to server');
+                    });
+            });
+
+            // Load data on page load
+            loadOwnerProfile();
+            loadDashboardStats();
+            loadFamilyMembers();
+            loadVisitorRecords();
+            loadPreApprovedVisitors();
+        
+            // Event Listeners
+            $('#sidebarToggle').on('click', () => $('.sidebar').toggleClass('show'));
+            $('#profileToggle').on('click', (e) => {
+                e.stopPropagation();
+                $('.profile-dropdown').toggleClass('show');
+            });
+            $(document).on('click', (e) => {
+                if (!$(e.target).closest('.owner-profile').length) {
+                    $('.profile-dropdown').removeClass('show');
+                }
+            });
+            $('a[href^="#"]').on('click', function(e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
+            });
+
+            // Filter Buttons
+            $('.btn-group button').on('click', function() {
+                $('.btn-group button').removeClass('active');
+                $(this).addClass('active');
+                const filter = $(this).text().toLowerCase();
+                loadVisitorRecords(filter);
+            });
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'930480b5ed4631e6',t:'MTc0NDY0NzMzNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9304c87e08a2804f',t:'MTc0NDY1MDI3NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9304e65c7d92e9f3',t:'MTc0NDY1MTQ5OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

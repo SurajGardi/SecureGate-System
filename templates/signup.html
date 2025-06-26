@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureGate - Authentication</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: rgb(245, 245, 220);
+            --secondary-color: #144272;
+            --accent-color: #205295;
+            --highlight-color: #2C74B3;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .auth-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 100%;
+            max-width: 900px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .auth-row {
+            min-height: 600px;
+        }
+
+        .auth-image {
+            background: linear-gradient(rgba(16, 110, 102, 0.9), rgba(19, 131, 110, 0.9)),
+                        url('https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=800');
+            background-size: cover;
+            background-position: center;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            color: white;
+            text-align: center;
+        }
+
+        .auth-form {
+            padding: 40px;
+        }
+
+        .form-control:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 0.2rem rgba(44, 116, 179, 0.25);
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+            padding: 10px 20px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--highlight-color);
+            border-color: var(--highlight-color);
+            transform: translateY(-2px);
+        }
+
+        .form-switch {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .otp-input {
+            letter-spacing: 0.5em;
+            text-align: center;
+            font-size: 1.5em;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-floating {
+            margin-bottom: 1rem;
+        }
+
+        .role-specific-fields {
+            display: none;
+        }
+
+        .role-specific-fields.show {
+            display: block;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="row g-0 auth-row">
+            <div class="col-md-5 auth-image">
+                <div>
+                    <i class="fas fa-shield-alt fa-3x mb-4"></i>
+                    <h2 class="mb-4">Welcome to SecureGate</h2>
+                    <p class="mb-4">Secure your apartment community with our advanced visitor management system.</p>
+                </div>
+            </div>
+            <div class="col-md-7 auth-form">
+                <!-- Sign In Form -->
+                <div id="signInForm">
+                    <h3 class="text-center mb-4">Sign In</h3>
+                    <form onsubmit="handleSignIn(event)">
+                        <div class="form-floating mb-3">
+                            <select class="form-select" id="signInRole" required>
+                                <option value="">Select Role</option>
+                                <option value="admin">Admin</option>
+                                <option value="guard">Guard</option>
+                                <option value="flat_owner">Flat Owner</option>
+                            </select>
+                            <label>Sign in as</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="email" class="form-control" id="signInEmail" placeholder="name@example.com" required>
+                            <label>Email address</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="password" class="form-control" id="signInPassword" placeholder="Password" required>
+                            <!-- <input type="password" class="form-control" id="signInPassword" pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$" placeholder="Password" required> -->
+                            <label>Password</label>
+                        </div>
+                        <div id="adminSignInFields" class="role-specific-fields">
+                            <div class="form-floating mb-3">
+                                <input type="password" class="form-control" id="signInAdminKey" placeholder="Admin Key" maxlength="4">
+                                <label>Admin Key (4 digits)</label>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 mb-3">Sign In</button>
+                    </form>
+                    <div class="form-switch">
+                        Don't have an account? <a href="#" onclick="toggleForms()" class="text-primary">Sign Up</a>
+                    </div>
+                </div>
+
+                <!-- Sign Up Form -->
+                <div id="signUpForm" style="display: none;">
+                    <h3 class="text-center mb-4">Create Account</h3>
+                    <form onsubmit="handleSignUp(event)">
+                        <div class="form-floating mb-3">
+                            <select class="form-select" id="signUpRole" onchange="handleRoleChange()" required>
+                                <option value="">Select Role</option>
+                                <option value="admin">Admin</option>
+                                <option value="guard">Guard</option>
+                                <option value="flat_owner">Flat Owner</option>
+                            </select>
+                            <label>Sign up as</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="signUpName" placeholder="Full Name" required>
+                            <label>Full Name</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="email" class="form-control" id="signUpEmail" placeholder="name@example.com" required>
+                            <label>Email address</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="tel" class="form-control" id="signUpWhatsapp" placeholder="WhatsApp Number" required>
+                            <label>WhatsApp Number</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="password" class="form-control" id="signUpPassword" placeholder="Password" required>
+                            <label>Password</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="password" class="form-control" id="signUpConfirmPassword" placeholder="Confirm Password" required>
+                            <label>Confirm Password</label>
+                        </div>
+                        <div id="flatOwnerFields" class="role-specific-fields">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="flatNumber" placeholder="Flat Number">
+                                <label>Flat Number</label>
+                            </div>
+                        </div>
+                        <div id="adminFields" class="role-specific-fields">
+                            <div class="form-floating mb-3">
+                                <input type="password" class="form-control" id="adminKey" placeholder="Admin Key (4 digits)" maxlength="4" >
+                                <label>Admin Key (4 digits)</label>
+                                </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 mb-3">Create Account</button>
+                    </form>
+                    <div class="form-switch">
+                        Already have an account? <a href="#" onclick="toggleForms()" class="text-primary">Sign In</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- OTP Modal -->
+    <div class="modal fade" id="otpModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Enter OTP</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Please enter the OTP sent to your email</p>
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control otp-input" id="otpInput" maxlength="6" placeholder="000000">
+                        <label>OTP</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="verifyOTP(event)">Verify OTP</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function toggleForms() {
+            const signInForm = document.getElementById('signInForm');
+            const signUpForm = document.getElementById('signUpForm');
+            signInForm.style.display = signInForm.style.display === 'none' ? 'block' : 'none';
+            signUpForm.style.display = signUpForm.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function handleRoleChange() {
+            const role = document.getElementById('signUpRole').value;
+            const flatOwnerFields = document.getElementById('flatOwnerFields');
+            const adminFields = document.getElementById('adminFields');
+            flatOwnerFields.classList.remove('show');
+            adminFields.classList.remove('show');
+            if (role === 'flat_owner') flatOwnerFields.classList.add('show');
+            if (role === 'admin') adminFields.classList.add('show');
+        }
+
+        function handleSignInRoleChange() {
+            const role = document.getElementById('signInRole').value;
+            const adminFields = document.getElementById('adminSignInFields');
+            adminFields.classList.remove('show');
+            if (role === 'admin') adminFields.classList.add('show');
+        }
+
+        document.getElementById('signInRole').addEventListener('change', handleSignInRoleChange);
+
+        function handleSignIn(event) {
+            event.preventDefault();
+            const role = document.getElementById('signInRole').value;
+            const email = document.getElementById('signInEmail').value.trim();
+            const password = document.getElementById('signInPassword').value.trim();
+            const adminKey = role === 'admin' ? document.getElementById('signInAdminKey').value.trim() : '';
+            const otp = role === 'admin' ? document.getElementById('otpInput')?.value.trim() : '';
+
+            if (!role || !email || !password || (role === 'admin' && !adminKey)) {
+                alert('⚠️ All fields are required!');
+                return;
+            }
+
+            const data = { role, email, password };
+            if (role === 'admin') {
+                data.admin_key = adminKey;
+                if (otp) data.otp = otp;
+            }
+
+            fetch('/signin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    alert("✅ Login successful!");
+                    window.location.href = result.redirect_url;
+                } else if (result.message === 'OTP sent to email, please provide OTP and admin key') {
+                    showOTPModal();
+                } else {
+                    alert(`❌ Login failed: ${result.message}`);
+                }
+            })
+            .catch(error => {
+                console.error("Error during login:", error);
+                alert("⚠️ An error occurred. Please try again later.");
+            });
+        }
+
+        function handleSignUp(event) {
+            event.preventDefault();
+            const role = document.getElementById('signUpRole').value;
+            const name = document.getElementById('signUpName').value.trim();
+            const email = document.getElementById('signUpEmail').value.trim();
+            const whatsapp = document.getElementById('signUpWhatsapp').value.trim();
+            const password = document.getElementById('signUpPassword').value.trim();
+            const confirmPassword = document.getElementById('signUpConfirmPassword').value.trim();
+            const flatNumber = role === 'flat_owner' ? document.getElementById('flatNumber').value.trim() : '';
+            const adminKey = role === 'admin' ? document.getElementById('adminKey').value.trim() : '';
+
+            if (!role || !name || !email || !whatsapp || !password || !confirmPassword || 
+                (role === 'flat_owner' && !flatNumber) || (role === 'admin' && !adminKey)) {
+                alert('⚠️ All fields are required!');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                alert('⚠️ Passwords do not match!');
+                return;
+            }
+
+            const data = { role, name, email, whatsapp, password };
+            if (role === 'flat_owner') data.flatNumber = flatNumber;
+            if (role === 'admin') data.adminKey = adminKey;
+
+            fetch('/signup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    alert("✅ Signup successful! Please check your email for OTP.");
+                    showOTPModal();
+                } else {
+                    alert(`❌ Signup failed: ${result.message}`);
+                }
+            })
+            .catch(error => {
+                console.error("Error during signup:", error);
+                alert("⚠️ An error occurred. Please try again.");
+            });
+        }
+
+        function showOTPModal() {
+            const otpInput = document.getElementById('otpInput');
+            otpInput.value = '';
+            const modal = new bootstrap.Modal(document.getElementById('otpModal'));
+            modal.show();
+        }
+
+        function verifyOTP(event) {
+            event.preventDefault();
+            const otp = document.getElementById('otpInput').value.trim();
+            const role = document.getElementById('signUpRole')?.value || document.getElementById('signInRole').value;
+            const email = document.getElementById('signUpEmail')?.value.trim() || document.getElementById('signInEmail').value.trim();
+            const password = document.getElementById('signUpPassword')?.value.trim() || document.getElementById('signInPassword').value.trim();
+            const name = document.getElementById('signUpName')?.value.trim();
+            const whatsapp = document.getElementById('signUpWhatsapp')?.value.trim();
+            const flatNumber = document.getElementById('flatNumber')?.value.trim();
+            const adminKey = document.getElementById('adminKey')?.value.trim() || document.getElementById('signInAdminKey')?.value.trim();
+
+            if (!otp || otp.length !== 6) {
+                alert("⚠️ Please enter a valid 6-digit OTP!");
+                return;
+            }
+
+            const data = { email, otp, role };
+            if (role === 'admin') data.admin_key = adminKey;
+            if (role !== 'admin' || document.getElementById('signUpForm').style.display === 'block') {
+                data.name = name;
+                data.whatsapp = whatsapp;
+                data.password = password;
+                if (role === 'flat_owner') data.flatNumber = flatNumber;
+                if (role === 'admin') data.adminKey = adminKey;
+            }
+
+            const endpoint = (role === 'admin' && document.getElementById('signInForm').style.display === 'block') ? '/signin' : '/verify-otp';
+            
+            fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    alert("✅ Success! Redirecting...");
+                    window.location.href = result.redirect_url || '/';
+                } else {
+                    alert(`❌ Failed: ${result.message}`);
+                }
+            })
+            .catch(error => {
+                console.error("Error during OTP verification:", error);
+                alert("⚠️ An error occurred. Please try again.");
+            });
+        }
+
+        document.getElementById('signUpWhatsapp').addEventListener('input', function(e) {
+            let number = e.target.value.replace(/\D/g, '');
+            if (number.length > 10) number = number.substr(0, 10);
+            e.target.value = number;
+        });
+
+        document.getElementById('otpInput').addEventListener('input', function(e) {
+            let otp = e.target.value.replace(/\D/g, '');
+            if (otp.length > 6) otp = otp.substr(0, 6);
+            e.target.value = otp;
+        });
+    </script>
+</body>
+</html>
